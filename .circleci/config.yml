@@ -47,7 +47,7 @@ jobs:
       - run:
           name: "Run a Few Test Commands"
           command: |
-            mv dists/wtfutil /usr/local/bin
+            mv dist/wtfutil /usr/local/bin
 
             wtfutil --version
 
