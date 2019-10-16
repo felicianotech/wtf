@@ -1,0 +1,54 @@
+version: 2.1
+
+workflows:
+  main:
+    jobs:
+      - unit-tests
+      - bin-tests
+
+jobs:
+  unit-tests:
+    docker:
+      - image: cimg/go:1.13
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - go-mod-v1
+      - run:
+          name: "Download Dependancies"
+          command: go mod download
+      - run:
+          name: "Run Tests"
+          command: go test -v github.com/wtfutil/wtf/...
+      - save_cache:
+          key: go-mod-v1
+          paths:
+            - "/go/pkg/mod"
+
+  bin-tests:
+    docker:
+      - image: cibuilds/goreleaser:0.118
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - go-mod-v1
+      - run:
+          name: "Download Dependancies"
+          command: go mod download
+      - save_cache:
+          key: go-mod-v1
+          paths:
+            - "/go/pkg/mod"
+      - run:
+          name: "Build & Publish with GoReleaser"
+          command: goreleaser
+      - run:
+          name: "Run a Few Test Commands"
+          command: |
+            mv dists/wtfutil /usr/local/bin
+
+            wtfutil --version
+
+            wtfutil --help
